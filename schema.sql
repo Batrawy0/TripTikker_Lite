@@ -1,7 +1,54 @@
--- Create Tables
+-- User Type Table
+CREATE TABLE user_type
+(
+    id   SERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL
+);
+
+-- Role Table
+CREATE TABLE role
+(
+    id   SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+);
+
+-- Booking Status Table
+CREATE TABLE booking_status
+(
+    id     SERIAL PRIMARY KEY,
+    status VARCHAR(50) NOT NULL
+);
+
+-- Payment Integration Type Table
+CREATE TABLE payment_integration_type
+(
+    id   SERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL
+);
+
+-- Payment Status Table
+CREATE TABLE payment_status
+(
+    id     SERIAL PRIMARY KEY,
+    status VARCHAR(50) NOT NULL
+);
+
+-- Notification Type Table
+CREATE TABLE notification_type
+(
+    id   SERIAL PRIMARY KEY,
+    type VARCHAR(50) NOT NULL
+);
+
+-- Notification Status Table
+CREATE TABLE notification_status
+(
+    id     SERIAL PRIMARY KEY,
+    status VARCHAR(50) NOT NULL
+);
 
 -- User Table
-CREATE TABLE user
+CREATE TABLE "user"
 (
     id           SERIAL PRIMARY KEY,
     first_name   VARCHAR(100)        NOT NULL,
@@ -17,20 +64,6 @@ CREATE TABLE user
     FOREIGN KEY (user_type_id) REFERENCES user_type (id)
 );
 
--- User Type Table
-CREATE TABLE user_type
-(
-    id   SERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL
-);
-
--- Role Table
-CREATE TABLE role
-(
-    id   SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
-);
-
 -- User Role Table
 CREATE TABLE user_role
 (
@@ -38,7 +71,7 @@ CREATE TABLE user_role
     user_id     INTEGER NOT NULL,
     role_id     INTEGER NOT NULL,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (user_id) REFERENCES "user" (id),
     FOREIGN KEY (role_id) REFERENCES role (id)
 );
 
@@ -50,8 +83,17 @@ CREATE TABLE customer
     preferred_payment_setting_id INTEGER,
     created_at                   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at                   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (preferred_payment_setting_id) REFERENCES preferred_payment_setting (customer_id)
+    FOREIGN KEY (user_id) REFERENCES "user" (id)
+);
+
+-- Preferred Payment Setting Table
+CREATE TABLE preferred_payment_setting
+(
+    customer_id                 INTEGER NOT NULL,
+    payment_integration_type_id INTEGER NOT NULL,
+    PRIMARY KEY (customer_id, payment_integration_type_id),
+    FOREIGN KEY (customer_id) REFERENCES customer (id),
+    FOREIGN KEY (payment_integration_type_id) REFERENCES payment_integration_type (id)
 );
 
 -- Address Table
@@ -75,6 +117,30 @@ CREATE TABLE customer_preferences
     customer_id INTEGER NOT NULL,
     preferences TEXT    NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customer (id)
+);
+
+-- Payment Type Configuration Table
+CREATE TABLE payment_type_configuration
+(
+    id                          SERIAL PRIMARY KEY,
+    payment_integration_type_id INTEGER NOT NULL,
+    config_details              TEXT    NOT NULL,
+    FOREIGN KEY (payment_integration_type_id) REFERENCES payment_integration_type (id)
+);
+
+-- Transaction Table
+CREATE TABLE transaction
+(
+    id                            SERIAL PRIMARY KEY,
+    payment_type_configuration_id INTEGER        NOT NULL,
+    payment_status_id             INTEGER        NOT NULL,
+    total_amount                  NUMERIC(10, 2) NOT NULL,
+    currency                      VARCHAR(10)    NOT NULL,
+    transaction_date              TIMESTAMP      NOT NULL,
+    created_at                    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at                    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_type_configuration_id) REFERENCES payment_type_configuration (id),
+    FOREIGN KEY (payment_status_id) REFERENCES payment_status (id)
 );
 
 -- Flight Booking Table
@@ -114,27 +180,7 @@ CREATE TABLE hotel_booking
     FOREIGN KEY (transaction_id) REFERENCES transaction (id)
 );
 
--- Booking Status Table
-CREATE TABLE booking_status
-(
-    id     SERIAL PRIMARY KEY,
-    status VARCHAR(50) NOT NULL
-);
 
--- Transaction Table
-CREATE TABLE transaction
-(
-    id                            SERIAL PRIMARY KEY,
-    payment_type_configuration_id INTEGER        NOT NULL,
-    payment_status_id             INTEGER        NOT NULL,
-    total_amount                  NUMERIC(10, 2) NOT NULL,
-    currency                      VARCHAR(10)    NOT NULL,
-    transaction_date              TIMESTAMP      NOT NULL,
-    created_at                    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at                    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (payment_type_configuration_id) REFERENCES payment_type_configuration (id),
-    FOREIGN KEY (payment_status_id) REFERENCES payment_status (id)
-);
 
 -- Transaction Details Table
 CREATE TABLE transaction_details
@@ -145,38 +191,7 @@ CREATE TABLE transaction_details
     FOREIGN KEY (transaction_id) REFERENCES transaction (id)
 );
 
--- Payment Integration Type Table
-CREATE TABLE payment_integration_type
-(
-    id   SERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL
-);
 
--- Payment Type Configuration Table
-CREATE TABLE payment_type_configuration
-(
-    id                          SERIAL PRIMARY KEY,
-    payment_integration_type_id INTEGER NOT NULL,
-    config_details              TEXT    NOT NULL,
-    FOREIGN KEY (payment_integration_type_id) REFERENCES payment_integration_type (id)
-);
-
--- Preferred Payment Setting Table
-CREATE TABLE preferred_payment_setting
-(
-    customer_id                 INTEGER NOT NULL,
-    payment_integration_type_id INTEGER NOT NULL,
-    PRIMARY KEY (customer_id, payment_integration_type_id),
-    FOREIGN KEY (customer_id) REFERENCES customer (id),
-    FOREIGN KEY (payment_integration_type_id) REFERENCES payment_integration_type (id)
-);
-
--- Payment Status Table
-CREATE TABLE payment_status
-(
-    id     SERIAL PRIMARY KEY,
-    status VARCHAR(50) NOT NULL
-);
 
 -- Notification Table
 CREATE TABLE notification
@@ -192,20 +207,6 @@ CREATE TABLE notification
     FOREIGN KEY (notification_status_id) REFERENCES notification_status (id)
 );
 
--- Notification Type Table
-CREATE TABLE notification_type
-(
-    id   SERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL
-);
-
--- Notification Status Table
-CREATE TABLE notification_status
-(
-    id     SERIAL PRIMARY KEY,
-    status VARCHAR(50) NOT NULL
-);
-
 -- Audit Table
 CREATE TABLE audit
 (
@@ -213,4 +214,3 @@ CREATE TABLE audit
     details    TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
