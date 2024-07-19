@@ -1,4 +1,4 @@
-package com.mentorship.amadeus_api;
+package com.mentorship.external_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

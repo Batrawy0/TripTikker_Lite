@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>amadeus-api</module>
+    <module>external-api</module>
     <module>flight-search-service</module>
     <module>hotel-search-service</module>
     <module>booking-engine</module>
